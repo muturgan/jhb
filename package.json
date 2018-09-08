@@ -1,0 +1,57 @@
+{
+  "name": "ji_home_node_server",
+  "version": "1.0.0",
+  "description": "JI-Home node.js based restful server",
+  "main": "index.js",
+  "scripts": {
+    "test": "console.log('the server is up and running on port 2222');",
+    "build": "webpack",
+    "dev": "ts-node ./lib/server.ts",
+    "start": "nodemon ./dist/server.js",
+    "prod": "npm run build && npm run start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://LeeLoganSteiner@bitbucket.org/ittinc/ji_home_node_server.git"
+  },
+  "author": "ITT-team",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/ittinc/ji_home_node_server#readme",
+  "dependencies": {
+    "bluebird": "^3.5.2",
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.0.0",
+    "express": "^4.16.3",
+    "faye-websocket": "^0.11.1",
+    "js-base64": "^2.4.9",
+    "mkdirp": "^0.5.1",
+    "mysql": "^2.16.0",
+    "nodemon": "^1.18.4",
+    "promise-mysql": "^3.3.1",
+    "redis": "^2.8.0",
+    "socket.io": "^2.1.1",
+    "winston": "^3.1.0",
+    "ws": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/bluebird": "^3.5.24",
+    "@types/body-parser": "^1.17.0",
+    "@types/dotenv": "^4.0.3",
+    "@types/express": "^4.16.0",
+    "@types/js-base64": "^2.3.1",
+    "@types/mkdirp": "^0.5.2",
+    "@types/mysql": "^2.15.5",
+    "@types/node": "^10.9.4",
+    "@types/redis": "^2.8.6",
+    "@types/socket.io": "^1.4.38",
+    "@types/winston": "^2.4.4",
+    "@types/ws": "^6.0.1",
+    "ts-loader": "^5.0.0",
+    "ts-node": "^7.0.1",
+    "tslint": "^5.11.0",
+    "typescript": "^3.0.3",
+    "webpack": "^4.17.2",
+    "webpack-cli": "^3.1.0",
+    "webpack-node-externals": "^1.7.2"
+  }
+}
