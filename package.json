@@ -1,22 +1,10 @@
 {
-  "name": "ji_home_node_server",
+  "name": "jhb",
   "version": "1.0.0",
-  "description": "JI-Home node.js based restful server",
-  "main": "index.js",
-  "scripts": {
-    "test": "console.log('the server is up and running on port 2222');",
-    "build": "webpack",
-    "dev": "ts-node ./lib/server.ts",
-    "start": "nodemon ./dist/server.js",
-    "prod": "npm run build && npm run start"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://LeeLoganSteiner@bitbucket.org/ittinc/ji_home_node_server.git"
-  },
-  "author": "ITT-team",
+  "description": "jhb",
+  "main": "dist/server.js",
+  "author": "jhb",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/ittinc/ji_home_node_server#readme",
   "dependencies": {
     "bluebird": "^3.5.2",
     "body-parser": "^1.18.3",
