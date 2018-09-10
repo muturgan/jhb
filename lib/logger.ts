@@ -23,7 +23,7 @@ class Logget {
         return this._info;
     }
 
-    private _error(label: string, err: {[key: string]: any}): void {
+    private _error(label: string, err?: {[key: string]: any}): void {
         let errorString = label + '. ';
         for (let key in err) {
             errorString += `${key}: ${err[key]}; `;
@@ -36,4 +36,5 @@ class Logget {
     }
 }
 
-export default new Logget();
+const logger = new Logget();
+export default logger;

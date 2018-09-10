@@ -12,7 +12,7 @@ class MysqlDb {
     private async _sqlRequest(req: string) {
         try {
             const connection = await mysql.createConnection(this._config);
-            const rows = await connection.query(req);
+            const rows: Array<any> = await connection.query(req);
             connection.end();
             return rows;
         } catch (error) {
@@ -21,4 +21,5 @@ class MysqlDb {
     }
 }
 
-export default new MysqlDb();
+const db = new MysqlDb();
+export default db;

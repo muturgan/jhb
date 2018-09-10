@@ -39,6 +39,3 @@ Thumbs.db
 
 # local developing logs
 combined.log
-
-# .env file
-.env
