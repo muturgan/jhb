@@ -33,7 +33,7 @@ class AuthService {
 
     private async _verifyToken(id: number, req: Request) {
         try {
-            if ( !req.headers && !req.headers.authorization) {
+            if ( !req.headers && !req.headers['authorization']) {
                 return false;
             } else {
                 const rows = await db.sqlRequest(`

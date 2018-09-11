@@ -4,7 +4,7 @@ import logger from '../../logger';
 import authService from '../auth-service';
 import { getIdFromUrl, createEntity, decodeEntity, updateEntity } from '../support-functions';
 
-export class UserRoutes {    
+export class UserApiRoutes {    
     
     public routes(app): void {
 

@@ -25,8 +25,10 @@ class Logget {
 
     private _error(label: string, err?: {[key: string]: any}): void {
         let errorString = label + '. ';
-        for (let key in err) {
-            errorString += `${key}: ${err[key]}; `;
+        if (err) {
+            for (let key in err) {
+                errorString += `${key}: ${err[key]}; `;
+            }
         }
         this._logger.error(errorString);
     }

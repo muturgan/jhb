@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import db from '../../db-controller';
 import path = require('path');
 import logger from '../../logger';
+import { getIdFromUrl, createEntity, decodeEntity, updateEntity } from '../support-functions';
 
 export class DevRoutes {    
     
@@ -44,5 +45,21 @@ export class DevRoutes {
                 res.status(500).send(error);
             }
         });
+
+        app.route('/api/news')
+            .post( async (req: Request, res: Response) => {
+                try {
+                    const theNew = createEntity(req.body.query);
+                    await db.sqlRequest(`
+                        INSERT INTO news (${ theNew.fields }) VALUES (${ theNew.values });
+                    `);
+                    logger.info(`the new "${req.body.query.login}" created`);
+                    res.sendStatus(200);
+                } catch (error) {
+                    logger.error('new new creation failed', error);
+                    res.status(500).send(error);
+                }
+            }
+        );
     }
 }

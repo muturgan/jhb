@@ -4,24 +4,7 @@ import logger from '../logger';
 
 export class Routes {    
     
-    public routes(app): void {   
-        
-        // --------------------------------------------------------
-        // news
-
-        app.route('/api/news')
-        .get((req: Request, res: Response) => {
-            res.status(200).send({
-                message: 'You got the news list...'
-            })
-        });
-
-        app.route('/api/news/:id')
-        .get((req: Request, res: Response) => {       
-            res.status(200).send({
-                message: 'You got the single new detail...'
-            })
-        });
+    public routes(app): void {
 
 
         // --------------------------------------------------------
