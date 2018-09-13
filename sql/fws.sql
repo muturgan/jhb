@@ -1,0 +1,13 @@
+CREATE TABLE `fws`
+(
+    `id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT UNIQUE NOT NULL,
+	`name` VARCHAR(32) UNIQUE NOT NULL,
+  	`hause` VARCHAR(320) NOT NULL,
+  	`brand` VARCHAR(320) NOT NULL,
+  	`model` VARCHAR(320) NOT NULL,
+  	`oem` VARCHAR(320) NOT NULL,
+  	`platform` VARCHAR(320) NOT NULL,
+  	`language` VARCHAR(320) NOT NULL,
+	`updatingdate` DATETIME,
+	`creationdate` DATETIME
+);

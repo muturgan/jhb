@@ -4,6 +4,7 @@ import { Routes } from './routes/crmRoutes';
 import { DevRoutes } from './routes/api/dev-routes';
 import { UserApiRoutes } from './routes/api/user-routes';
 import { NewsApiRoutes } from './routes/api/news-routes';
+import { FwVersionsApiRoutes } from './routes/api/fw-versions-routes';
 import http = require('http');
 
 class App {
@@ -13,6 +14,7 @@ class App {
     private _devRoutes: Routes = new DevRoutes();
     private _userApiRoutes: Routes = new UserApiRoutes();
     private _newsApiRoutes: Routes = new NewsApiRoutes();
+    private _fwVersionsApiRoutes: Routes = new FwVersionsApiRoutes();
 
     constructor() {
         this.app = express();
@@ -21,6 +23,7 @@ class App {
         this._devRoutes.routes(this.app);
         this._userApiRoutes.routes(this.app);
         this._newsApiRoutes.routes(this.app);
+        this._fwVersionsApiRoutes.routes(this.app);
     }
 
     private config(): void{

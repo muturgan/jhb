@@ -17,8 +17,8 @@ export class NewsApiRoutes {
                     const news = await db.sqlRequest(`
                         SELECT * FROM news ${filters};
                     `);
-                    for (let theNew of news) {
-                        theNew = decodeEntity(theNew);
+                    for (let i = 0; i < news.length; i++) {
+                        news[i] = decodeEntity(news[i]);
                     }
                     logger.info(`news were sent`);
                     res.status(200).send(news);
@@ -45,6 +45,7 @@ export class NewsApiRoutes {
                     logger.error(`new id:${ getIdFromUrl(req.originalUrl) } sending failed`, error);
                     res.status(500).send(error);
                 }
-            });
+            }
+        );
     }
 }

@@ -1,4 +1,3 @@
-import { createUserType, updateUserType } from '../types/customTypes'
 import Base64 = require('js-base64');
 export const base64 = Base64.Base64;
 
@@ -12,6 +11,9 @@ const checkUndecoding = (key: string): boolean => {
         || key === 'updatingdate'
         || key === 'likes'
         || key === 'dislikes'
+        || key === 'latest'
+        || key === 'fwID'
+        || key === 'appID'
             ) {return true}
     return false;
 }
@@ -22,15 +24,21 @@ export const getIdFromUrl = (url: string): number => {
     return id;
 }
 
-export const createEntity = (query: createUserType): {fields: string, values: string} => {
+export const createEntity = (query: {[key: string]: string|number|boolean|Array<string>}): {fields: string, values: string} => {
+    console.log('query:');
+    console.log(query);
     let fields = 'creationdate, ';
     let values = 'NOW(), ';
     for (let key in query) {
         fields += `${ key }, `;
-        if (key === 'permissions') {
+        if (checkUndecoding(key)) {
             values += `'${ query[key] }', `;
         } else {
-            values += `'${ base64.encode( String(query[key]) ) }', `;
+            if (Array.isArray(query[key])) {
+                values += `'${ base64.encode(JSON.stringify(query[key])) }', `;
+            } else {
+                values += `'${ base64.encode(query[key] as string) }', `;
+            }
         }
     }
     fields = fields.substring(0, fields.length - 2);
@@ -38,13 +46,17 @@ export const createEntity = (query: createUserType): {fields: string, values: st
     return {fields, values}
 }
 
-export const updateEntity = (query: updateUserType): string => {
+export const updateEntity = (query: {[key: string]: string|number|boolean|Array<string>}): string => {
     let key_values = `updatingdate = NOW(), `;
     for (let key in query) {
         if ( checkUndecoding(key) ) {
             key_values += `${ key } = '${ query[key] }', `;
         } else {
-            key_values += `${ key } = '${ base64.encode( String(query[key]) ) }', `;
+            if (Array.isArray(query[key])) {
+                key_values += `${ key } = '${ base64.encode( JSON.stringify(query[key])) }', `;
+            } else {
+                key_values += `${ key } = '${ base64.encode( query[key] as string ) }', `;
+            }
         }
     }
     key_values = key_values.substring(0, key_values.length - 2);
@@ -52,11 +64,12 @@ export const updateEntity = (query: updateUserType): string => {
 }
 
 export const decodeEntity = (entity: {[key: string]: string|null }) => {
-    const decodedEntity: {[key: string]: string|number|boolean|null } = entity;
-        for (let key in entity) {
-            const value = entity[key];
+    const decodedEntity: {[key: string]: string|number|null } = {};
+    Object.assign(decodedEntity, entity);
+        for (let key in decodedEntity) {
+            const value = decodedEntity[key];
             if ( !checkUndecoding(key) && value) {
-                decodedEntity[key] = base64.decode(value);
+                decodedEntity[key] = base64.decode(value as string);
                 const newValue = decodedEntity[key];
                 if (newValue) {
                     if (!isNaN(+newValue)) {

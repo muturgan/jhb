@@ -1,0 +1,16 @@
+CREATE TABLE `devices`
+(
+    `id` INT UNSIGNED PRIMARY KEY AUTO_INCREMENT UNIQUE NOT NULL,
+	`imei` VARCHAR(64) UNIQUE NOT NULL,
+    `hause` VARCHAR(32) NOT NULL,
+  	`brand` VARCHAR(32) NOT NULL,
+  	`model` VARCHAR(32) NOT NULL,
+  	`oem` VARCHAR(32) NOT NULL,
+  	`platform` VARCHAR(32) NOT NULL,
+  	`language` VARCHAR(32) NOT NULL,
+  	`s/n` VARCHAR(64) NOT NULL,
+  	`region` VARCHAR(64) NOT NULL,
+  	`fwID` VARCHAR(64) NOT NULL,
+	`updatingdate` DATETIME,
+	`creationdate` DATETIME
+);
