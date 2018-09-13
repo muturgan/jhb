@@ -1,20 +1,22 @@
 {
   "name": "ji_home_node_server",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "JI-Home node.js based restful server",
-  "main": "index.js",
+  "main": "./dist/server.js",
   "scripts": {
-    "test": "console.log('the server is up and running on port 2222');",
     "build": "webpack",
-    "dev": "ts-node ./lib/server.ts",
-    "start": "nodemon ./dist/server.js",
-    "prod": "npm run build && npm run start"
+    "dev": "webpack --watch & nodemon",
+    "prod": "npm run build && npm run start",
+    "start": "node ./dist/server.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://LeeLoganSteiner@bitbucket.org/ittinc/ji_home_node_server.git"
   },
-  "author": "ITT-team",
+  "author": {
+    "name": "ITT-team",
+    "email": "office@ittest-team.ru"
+  },
   "license": "ISC",
   "homepage": "https://bitbucket.org/ittinc/ji_home_node_server#readme",
   "dependencies": {
@@ -52,7 +54,7 @@
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
     "typescript": "^3.0.3",
-    "webpack": "^4.18.0",
+    "webpack": "^4.18.1",
     "webpack-cli": "^3.1.0",
     "webpack-node-externals": "^1.7.2"
   }
