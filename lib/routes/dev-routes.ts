@@ -38,9 +38,10 @@ export class DevRoutes {
         app.route('/mysqler')
         .post( async (req: Request, res: Response) => {
             try {
-                const rows = await db.sqlRequest(req.body);
+                const rows = await db.sqlRequest(req.body.query);
                 res.status(200).send({rows});
             } catch (error) {
+                console.error('');
                 console.error('mysqler error:');
                 console.error(error);
                 res.status(500).send(error);

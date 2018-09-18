@@ -39,24 +39,28 @@ export class AdminRoutes {
             }
         );
 
-        app.route('/api/admin/logout/:id')
+        app.route('/api/admin/logout')
             .get( async (req: Request, res: Response) => {
                 try {
-                    const id = getIdFromUrl(req.originalUrl);
-                    const validity = await authService.verifyToken(id, req);
+                    const validity = await authService.verifyToken(req);
 
-                    if (!validity) {
-                        logger.error(`unauthorized user tried to logout user id:${ id } info`);
+                    if (!validity.authorized) {
+                        logger.error(`unauthorized user tried to logout as admin`, Object.assign(req.body, req.headers));
                         res.sendStatus(401);
                     } else {
-                        await db.sqlRequest(`
-                            UPDATE users SET status = 'offline' WHERE id = ${ id };
-                        `);
-                        logger.info(`user id:${ id } logout`);
-                        res.sendStatus(200);
+                        if (validity.permissions !== 8) {
+                            logger.error(`user with low permissions tried to login as admin`, Object.assign(req.body, req.headers));
+                            res.sendStatus(403);
+                        } else {
+                            await db.sqlRequest(`
+                                UPDATE users SET status = 'offline' WHERE id = ${ validity.id };
+                            `);
+                            logger.info(`user id:${ validity.id } logout`);
+                            res.sendStatus(200);
+                        }
                     }
                 } catch (error) {
-                    logger.error(`user id:${ getIdFromUrl(req.originalUrl) } logout failed`, error);
+                    logger.error(`admin logout failed`, error);
                     res.status(500).send(error);
                 }
             }
