@@ -17,7 +17,7 @@ class AuthService {
     private async _login(applicant: {login: string, password: string, isAdmin?: boolean}) {
         try {
             const rows: Array<{id: number, login: string, email: string, permissions: number}> = await db.sqlRequest(`
-                SELECT id, email, permissions FROM users WHERE password="${ base64.encode(applicant.password) } AND login="${ base64.encode(applicant.login) }";
+                SELECT id, email, permissions FROM users WHERE password='${ base64.encode(applicant.password) }' AND login='${ base64.encode(applicant.login) }';
             `);
 
             if (rows[0]) {
