@@ -14,22 +14,21 @@ const checkUndecoding = (key: string): boolean => {
         || key === 'latest'
         || key === 'fwID'
         || key === 'appID'
-            ) {return true}
+        || key === 'fullimage'
+            ) {return true; }
     return false;
-}
+};
 
-export const getIdFromUrl = (url: string): number => {
+export const getIdFromUrl = (url: string, depth: number = 0): number => {
     const parts = url.split('/');
-    const id = +parts[parts.length - 1];
+    const id = +parts[parts.length - (1 + depth)];
     return id;
-}
+};
 
 export const createEntity = (query: {[key: string]: string|number|boolean|Array<string>}): {fields: string, values: string} => {
-    console.log('query:');
-    console.log(query);
     let fields = 'creationdate, ';
     let values = 'NOW(), ';
-    for (let key in query) {
+    for (const key in query) {
         fields += `${ key }, `;
         if (checkUndecoding(key)) {
             values += `'${ query[key] }', `;
@@ -43,12 +42,12 @@ export const createEntity = (query: {[key: string]: string|number|boolean|Array<
     }
     fields = fields.substring(0, fields.length - 2);
     values = values.substring(0, values.length - 2);
-    return {fields, values}
-}
+    return {fields, values};
+};
 
 export const updateEntity = (query: {[key: string]: string|number|boolean|Array<string>}): string => {
     let key_values = `updatingdate = NOW(), `;
-    for (let key in query) {
+    for (const key in query) {
         if ( checkUndecoding(key) ) {
             key_values += `${ key } = '${ query[key] }', `;
         } else {
@@ -61,12 +60,12 @@ export const updateEntity = (query: {[key: string]: string|number|boolean|Array<
     }
     key_values = key_values.substring(0, key_values.length - 2);
     return key_values;
-}
+};
 
 export const decodeEntity = (entity: {[key: string]: string|null }) => {
     const decodedEntity: {[key: string]: string|number|null } = {};
     Object.assign(decodedEntity, entity);
-        for (let key in decodedEntity) {
+        for (const key in decodedEntity) {
             const value = decodedEntity[key];
             if ( !checkUndecoding(key) && value) {
                 decodedEntity[key] = base64.decode(value as string);
@@ -79,17 +78,17 @@ export const decodeEntity = (entity: {[key: string]: string|null }) => {
             }
         }
     return decodedEntity;
-}
+};
 
 export const setFilters = (filters: {[key: string]: string }): string => {
     let filtersString = '';
-    for (let key in filters) {
+    for (const key in filters) {
         if (checkUndecoding(key)) {
-            filtersString += `${ key }=${ filters[key] } `;
+            filtersString += `${ key }=${ filters[key] } AND `;
         } else {
-            filtersString += `${ key }='${ base64.encode(filters[key]) }' `;
+            filtersString += `${ key }='${ base64.encode(filters[key]) }' AND `;
         }
     }
-    filtersString = `WHERE ${filtersString}`;
+    filtersString = `WHERE ${filtersString.substring(0, filtersString.length - 5)}`;
     return filtersString;
-}
+};

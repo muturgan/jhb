@@ -4,7 +4,7 @@ import fs = require('fs');
 import mkdirp = require('mkdirp');
 
 const redis_key = 'TEST_JSON';
-const folder_json = './JSON_TEST'
+const folder_json = './JSON_TEST';
 const file_json = '/json_from_api';
 
 class Redis {
@@ -18,11 +18,11 @@ class Redis {
             logger.error('"Error" event in "Redis"', error);
         });
         // --subscribe for event "connection"---
-        this._redisClient.on('connect', () => { 
+        this._redisClient.on('connect', () => {
             logger.info('Redis connected.');
         });
         // ----del old keys from redis-------
-        this._redisClient.keys("*", (error, keys: Array<string>) => {
+        this._redisClient.keys('*', (error, keys: Array<string>) => {
             keys.forEach( (key) => {
                 if (error) {
                     logger.error(`Cannot delete ${key} key`, error);
@@ -33,7 +33,7 @@ class Redis {
         });
     }
 
-    // -----------Push to Redis on END of queue---------  
+    // -----------Push to Redis on END of queue---------
     public get pushToRedis() {
         return this._pushToRedis;
     }
@@ -46,11 +46,11 @@ class Redis {
             }
         });
     }
-    // -------------------Pop from Redis --------------------------  
+    // -------------------Pop from Redis --------------------------
     public get popFromRedis() {
         return this._popFromRedis;
     }
-    
+
     private _popFromRedis(): void {
         this._redisClient.lpop(redis_key, (error, repl) => {
             if (error) {
@@ -64,13 +64,13 @@ class Redis {
     public get removeFromRedis() {
         return this._removeFromRedis;
     }
-    
+
     private _removeFromRedis(data: string): void {
         this._redisClient.lrem(redis_key, 0, data , (error) => {
             if (error) {
-                logger.error('Cannot deleted send JSON from "Redis": ' + data.slice(0,15), error);
+                logger.error('Cannot deleted send JSON from "Redis": ' + data.slice(0, 15), error);
             } else {
-                logger.info('DONE: Deleted send JSON from "Redis": ' + data.slice(0,15));
+                logger.info('DONE: Deleted send JSON from "Redis": ' + data.slice(0, 15));
             }
         });
     }
@@ -78,10 +78,10 @@ class Redis {
     public get writeToFile() {
         return this._writeToFile;
     }
-    
+
     private _writeToFile (str: string): void {
             mkdirp(folder_json, (error) =>  {  // path exists unless there was an error
-                let filePath = folder_json + file_json + '(' + new Date().toISOString() + ').txt';
+                const filePath = folder_json + file_json + '(' + new Date().toISOString() + ').txt';
                 if (!error) {
                     fs.writeFileSync(filePath, str);
                     logger.info('DONE: Save JSON to file: ' + filePath);

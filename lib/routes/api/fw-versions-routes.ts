@@ -3,8 +3,8 @@ import db from '../../db-controller';
 import logger from '../../logger';
 import { getIdFromUrl, decodeEntity, setFilters } from '../support-functions';
 
-export class FwVersionsApiRoutes {    
-    
+export class FwVersionsApiRoutes {
+
     public routes(app): void {
 
         app.route('/api/fw-versions')
