@@ -31,11 +31,11 @@ export class AppVersionsAdminRoutes {
 
             .post( async (req: Request, res: Response) => {
                 try {
-                    const app_version = createEntity(req.body.query);
+                    const app_version = createEntity(req.body);
                     await db.sqlRequest(`
                         INSERT INTO appversions (${ app_version.fields }) VALUES (${ app_version.values });
                     `);
-                    logger.info(`new app-version "${req.body.query.version}" created`);
+                    logger.info(`new app-version "${req.body.version}" created`);
                     res.sendStatus(200);
                 } catch (error) {
                     logger.error('new app-version creation failed', error);
@@ -64,7 +64,7 @@ export class AppVersionsAdminRoutes {
             .put( async (req: Request, res: Response) => {
                 try {
                     const id = getIdFromUrl(req.originalUrl);
-                    const updatedAppVersion = updateEntity(req.body.query);
+                    const updatedAppVersion = updateEntity(req.body);
                     await db.sqlRequest(`
                         UPDATE app-versions SET ${ updatedAppVersion } WHERE id="${ id }";
                     `);

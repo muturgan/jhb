@@ -31,11 +31,11 @@ export class NewsAdminRoutes {
 
             .post( async (req: Request, res: Response) => {
                 try {
-                    const theNew = createEntity(req.body.query);
+                    const theNew = createEntity(req.body);
                     await db.sqlRequest(`
                         INSERT INTO news (${ theNew.fields }) VALUES (${ theNew.values });
                     `);
-                    logger.info(`the new "${req.body.query.title}" created`);
+                    logger.info(`the new "${req.body.title}" created`);
                     res.sendStatus(200);
                 } catch (error) {
                     logger.error('new new creation failed', error);
@@ -64,7 +64,7 @@ export class NewsAdminRoutes {
             .put( async (req: Request, res: Response) => {
                 try {
                     const id = getIdFromUrl(req.originalUrl);
-                    const updatedNew = updateEntity(req.body.query);
+                    const updatedNew = updateEntity(req.body);
                     await db.sqlRequest(`
                         UPDATE news SET ${ updatedNew } WHERE id="${ id }";
                     `);

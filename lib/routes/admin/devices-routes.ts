@@ -31,11 +31,11 @@ export class DevicesAdminRoutes {
 
             .post( async (req: Request, res: Response) => {
                 try {
-                    const device = createEntity(req.body.query);
+                    const device = createEntity(req.body);
                     await db.sqlRequest(`
                         INSERT INTO devices (${ device.fields }) VALUES (${ device.values });
                     `);
-                    logger.info(`new device "${req.body.query.imei}" created by admin`);
+                    logger.info(`new device "${req.body.imei}" created by admin`);
                     res.sendStatus(200);
                 } catch (error) {
                     logger.error('new device creation failed', error);
@@ -64,7 +64,7 @@ export class DevicesAdminRoutes {
             .put( async (req: Request, res: Response) => {
                 try {
                     const id = getIdFromUrl(req.originalUrl);
-                    const updatedDevice = updateEntity(req.body.query);
+                    const updatedDevice = updateEntity(req.body);
                     await db.sqlRequest(`
                         UPDATE devices SET ${ updatedDevice } WHERE id="${ id }";
                     `);

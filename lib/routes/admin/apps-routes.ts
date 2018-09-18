@@ -31,11 +31,11 @@ export class AppsAdminRoutes {
 
             .post( async (req: Request, res: Response) => {
                 try {
-                    const createdApp = createEntity(req.body.query);
+                    const createdApp = createEntity(req.body);
                     await db.sqlRequest(`
                         INSERT INTO apps (${ createdApp.fields }) VALUES (${ createdApp.values });
                     `);
-                    logger.info(`new app "${req.body.query.name}" created`);
+                    logger.info(`new app "${req.body.name}" created`);
                     res.sendStatus(200);
                 } catch (error) {
                     logger.error('new app creation failed', error);
@@ -64,7 +64,7 @@ export class AppsAdminRoutes {
             .put( async (req: Request, res: Response) => {
                 try {
                     const id = getIdFromUrl(req.originalUrl);
-                    const updatedApp = updateEntity(req.body.query);
+                    const updatedApp = updateEntity(req.body);
                     await db.sqlRequest(`
                         UPDATE apps SET ${ updatedApp } WHERE id="${ id }";
                     `);

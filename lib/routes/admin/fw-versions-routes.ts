@@ -31,11 +31,11 @@ export class FwVersionsAdminRoutes {
 
             .post( async (req: Request, res: Response) => {
                 try {
-                    const fw_version = createEntity(req.body.query);
+                    const fw_version = createEntity(req.body);
                     await db.sqlRequest(`
                         INSERT INTO fwversions (${ fw_version.fields }) VALUES (${ fw_version.values });
                     `);
-                    logger.info(`new fw-version "${req.body.query.version}" created`);
+                    logger.info(`new fw-version "${req.body.version}" created`);
                     res.sendStatus(200);
                 } catch (error) {
                     logger.error('new fw-version creation failed', error);
@@ -64,7 +64,7 @@ export class FwVersionsAdminRoutes {
             .put( async (req: Request, res: Response) => {
                 try {
                     const id = getIdFromUrl(req.originalUrl);
-                    const updatedFwVersion = updateEntity(req.body.query);
+                    const updatedFwVersion = updateEntity(req.body);
                     await db.sqlRequest(`
                         UPDATE fwversions SET ${ updatedFwVersion } WHERE id="${ id }";
                     `);

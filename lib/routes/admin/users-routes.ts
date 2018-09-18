@@ -31,11 +31,11 @@ export class UsersAdminRoutes {
 
             .post( async (req: Request, res: Response) => {
                 try {
-                    const user = createEntity(req.body.query);
+                    const user = createEntity(req.body);
                     await db.sqlRequest(`
                         INSERT INTO users (${ user.fields }) VALUES (${ user.values });
                     `);
-                    logger.info(`new user "${req.body.query.login}" created by admin`);
+                    logger.info(`new user "${req.body.login}" created by admin`);
                     res.sendStatus(200);
                 } catch (error) {
                     logger.error('new user creation failed', error);
@@ -64,7 +64,7 @@ export class UsersAdminRoutes {
             .put( async (req: Request, res: Response) => {
                 try {
                     const id = getIdFromUrl(req.originalUrl);
-                    const updatedUser = updateEntity(req.body.query);
+                    const updatedUser = updateEntity(req.body);
                     await db.sqlRequest(`
                         UPDATE users SET ${ updatedUser } WHERE id="${ id }";
                     `);

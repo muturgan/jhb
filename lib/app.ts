@@ -13,7 +13,8 @@ import { AppsAdminRoutes } from './routes/admin/apps-routes';
 import { FwVersionsAdminRoutes } from './routes/admin/fw-versions-routes';
 import { AppVersionsAdminRoutes } from './routes/admin/app-versions-routes';
 import { NewsAdminRoutes } from './routes/admin/news-routes';
-import http = require('http');
+import { AdminRoutes } from './routes/admin/admin-routes';
+import { Server } from 'http';
 
 class App {
 
@@ -31,6 +32,7 @@ class App {
     private _fwVersionsAdminRoutes: FwVersionsAdminRoutes = new FwVersionsAdminRoutes();
     private _appVersionsAdminRoutes: AppVersionsAdminRoutes = new AppVersionsAdminRoutes();
     private _newsAdminRoutes: NewsAdminRoutes = new NewsAdminRoutes();
+    private _adminRoutes: AdminRoutes = new AdminRoutes();
 
     constructor() {
         this._config();
@@ -39,6 +41,11 @@ class App {
     }
 
     private _config(): void {
+        this.app.use((req, res, next) => {
+            res.header('Access-Control-Allow-Origin', '*');
+            res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+            next();
+          });
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({ extended: false }));
     }
@@ -53,6 +60,7 @@ class App {
     }
 
     private _setAdminRoutes(): void {
+        this._adminRoutes.routes(this.app);
         this._userAdminRoutes.routes(this.app);
         this._devicesAdminRoutes.routes(this.app);
         this._projectsAdminRoutes.routes(this.app);
@@ -65,5 +73,5 @@ class App {
 }
 
 const app = new App().app;
-const server = new http.Server(app);
+const server = new Server(app);
 export default server;

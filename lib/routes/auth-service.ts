@@ -14,39 +14,43 @@ class AuthService {
     }
 
 
-    private async _login(applicant: {login: string, password: string}) {
+    private async _login(applicant: {login: string, password: string, isAdmin?: boolean}) {
         try {
-            const rows: Array<{login: string, id: number}> = await db.sqlRequest(`
-                SELECT login, id FROM users WHERE password="${ base64.encode(applicant.password) }";
+            const rows: Array<{login: string, id: number, permissions: number}> = await db.sqlRequest(`
+                SELECT login, id, permissions FROM users WHERE password="${ base64.encode(applicant.password) }";
             `);
 
             if (rows[0]) {
-                const token = md5(`Bearer: ${ applicant.login }`);
-                return { token: token.toString(), id: rows[0].id };
+                if ( !applicant.isAdmin || (applicant.isAdmin && rows[0].permissions > 0) ) {
+                    const token = md5(`Bearer: ${ applicant.login }`);
+                    return { token: token.toString(), id: rows[0].id, code: 200 };
+                } else {
+                    return { token: '', id: 0, code: 403 };
+                }
             } else {
-                return false;
+                return { token: '', id: 0, code: 401 };
             }
         } catch (error) {
             throw error;
         }
     }
 
-    private async _verifyToken(id: number, req: Request) {
+    private async _verifyToken(id: number, req: Request, isAdmin: boolean = false) {
         try {
             if ( !req.headers && !req.headers['authorization']) {
-                return false;
+                return {authorized: false};
             } else {
                 const rows = await db.sqlRequest(`
-                    SELECT login FROM users WHERE id="${ id }";
+                    SELECT login, permissions FROM users WHERE id="${ id }";
                 `);
 
                 if (
                     rows[0]
                     && req.headers.authorization === md5(`Bearer: ${ base64.decode(rows[0].login) }`).toString()
                         ) {
-                            return true;
+                            return {authorized: true, permissions: rows[0].permissions};
                 } else {
-                    return false;
+                    return {authorized: false};
                 }
             }
         } catch (error) {

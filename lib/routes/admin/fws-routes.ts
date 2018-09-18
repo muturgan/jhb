@@ -31,11 +31,11 @@ export class FwsAdminRoutes {
 
             .post( async (req: Request, res: Response) => {
                 try {
-                    const fw = createEntity(req.body.query);
+                    const fw = createEntity(req.body);
                     await db.sqlRequest(`
                         INSERT INTO fws (${ fw.fields }) VALUES (${ fw.values });
                     `);
-                    logger.info(`new fw "${req.body.query.name}" created`);
+                    logger.info(`new fw "${req.body.name}" created`);
                     res.sendStatus(200);
                 } catch (error) {
                     logger.error('new fw creation failed', error);
@@ -64,7 +64,7 @@ export class FwsAdminRoutes {
             .put( async (req: Request, res: Response) => {
                 try {
                     const id = getIdFromUrl(req.originalUrl);
-                    const updatedFw = updateEntity(req.body.query);
+                    const updatedFw = updateEntity(req.body);
                     await db.sqlRequest(`
                         UPDATE fws SET ${ updatedFw } WHERE id="${ id }";
                     `);

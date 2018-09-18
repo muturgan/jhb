@@ -12,11 +12,11 @@ export class UserApiRoutes {
         app.route('/api/user')
             .post( async (req: Request, res: Response) => {
                 try {
-                    const user = createEntity(req.body.query);
+                    const user = createEntity(req.body);
                     await db.sqlRequest(`
                         INSERT INTO users (${ user.fields }) VALUES (${ user.values });
                     `);
-                    logger.info(`new user ${req.body.query.login} created`);
+                    logger.info(`new user ${req.body.login} created`);
                     res.sendStatus(200);
                 } catch (error) {
                     logger.error('new user creation failed', error);
@@ -34,7 +34,7 @@ export class UserApiRoutes {
                     const validity = await authService.verifyToken(id, req);
 
                     if (!validity) {
-                        logger.error(`unauthorized user tried to get user id:${ id } info`);
+                        logger.error(`unauthorized user tried to get user id:${ id } info`, {headers: req.headers});
                         res.sendStatus(401);
                     } else {
                         const rows = await db.sqlRequest(`
@@ -59,7 +59,7 @@ export class UserApiRoutes {
                         logger.error(`unauthorized user tried to update user id:${ id } info`);
                         res.sendStatus(401);
                     } else {
-                        const updatedUser = updateEntity(req.body.query);
+                        const updatedUser = updateEntity(req.body);
                         await db.sqlRequest(`
                             UPDATE users SET ${ updatedUser } WHERE id="${ id }";
                         `);
@@ -99,20 +99,25 @@ export class UserApiRoutes {
         app.route('/api/user/login')
             .post( async (req: Request, res: Response) => {
                 try {
-                    const validity = await authService.login(req.body.query);
+                    const validity = await authService.login(req.body);
 
-                    if (!validity) {
-                        logger.info(`incorrect password`);
-                        res.sendStatus(401);
-                    } else {
-                        await db.sqlRequest(`
-                            UPDATE users SET status = 'online' WHERE id = ${ validity.id };
-                        `);
-                        logger.info(`user id:${validity.id} login`);
-                        res.status(200).send(validity);
+                    switch (validity.code) {
+                        case 200:
+                            await db.sqlRequest(`
+                                UPDATE users SET status = 'online' WHERE id = ${ validity.id };
+                            `);
+                            logger.info(`user id:${validity.id} login`);
+                            res.status(200).send({token: validity.token, id: validity.id});
+                            break;
+                        case 401:
+                            logger.info(`incorrect password by user ${req.body.login}`);
+                            res.sendStatus(401);
+                            break;
+                        default:
+                            logger.error(`something wrong with autorization`, req.body);
                     }
                 } catch (error) {
-                    logger.error('login failed', error);
+                    logger.error(`login failed for ${req.body.login}`, error);
                     res.status(500).send(error);
                 }
             }
@@ -153,8 +158,8 @@ export class UserApiRoutes {
                         logger.error(`unauthorized user tried to get fw versions info`, req);
                         res.sendStatus(401);
                     } else {
-                        if (!req.body || !req.body.query || !req.body.query.brand || !req.body.query.model) {
-                            logger.error(`not enough data to get the current fw version info for user id:${ id }`, req.body.query);
+                        if (!req.body || !req.body.brand || !req.body.model) {
+                            logger.error(`not enough data to get the current fw version info for user id:${ id }`, req.body);
                             res.status(412)
                                 .send(`Not enough data to get the current firmware version info. You must specify: brand, model`);
                         } else {
@@ -163,7 +168,7 @@ export class UserApiRoutes {
                             `);
 
                             if (!versions.length) {
-                                logger.error(`there is no fw versions for user's id:${ id } device`, req.body.query);
+                                logger.error(`there is no fw versions for user's id:${ id } device`, req.body);
                                 res.status(204).send(`There is no firmware versions for your device`);
                             } else {
                                 const version = decodeEntity( versions[versions.length - 1] );
@@ -192,24 +197,23 @@ export class UserApiRoutes {
                     } else {
                         if (
                             !req.body
-                            || !req.body.query
-                            || !req.body.query.brand
-                            || !req.body.query.model
-                            || !('isRoot' in req.body.query)
+                            || !req.body.brand
+                            || !req.body.model
+                            || !('isRoot' in req.body)
                             ) {
-                                if (!('isRoot' in req.body.query)) {
+                                if (!('isRoot' in req.body)) {
                                     logger
-                                        .error(`there is no isRoot info in request from user id:${ id }`, req.body.query);
+                                        .error(`there is no isRoot info in request from user id:${ id }`, req.body);
                                     res.status(412)
                                         .send(`Your aplication can't send correct request`);
                                 } else {
                                     logger
-                                        .error(`not enough data to get the current fw version info for user id:${ id }`, req.body.query);
+                                        .error(`not enough data to get the current fw version info for user id:${ id }`, req.body);
                                     res.status(412)
                                         .send(`Not enough data to get the current firmware version info. You must specify: brand, model`);
                                 }
                         } else {
-                            if (req.body.query.isRoot) {
+                            if (req.body.isRoot) {
                                 res.status(200).send('temporarily unavailable...');
                             } else {
                                  const versions = await db.sqlRequest(`
@@ -217,14 +221,14 @@ export class UserApiRoutes {
                                 `);
 
                                 if (!versions.length) {
-                                    logger.error(`there is no fw versions for user's id:${ id } device`, req.body.query);
+                                    logger.error(`there is no fw versions for user's id:${ id } device`, req.body);
                                     res.status(204).send(`There is no firmware versions for your device`);
                                 } else {
                                     const version = decodeEntity( versions[versions.length - 1] );
                                     const versionPath = path.join(__dirname,
                                         `update/${
-                                        req.body.query.brand }/${
-                                        req.body.query.model }/${
+                                        req.body.brand }/${
+                                        req.body.model }/${
                                         (version.version as string).substring(0, (version.version as string).length - 1) }/fullimage/${
                                         version.version }.txt`);
                                     fs.stat(versionPath, (error, stats) => {
@@ -249,7 +253,7 @@ export class UserApiRoutes {
                             // `);
 
                             // if (!versions.length) {
-                            //     logger.error(`there is no fw versions for user's id:${ id } device`, req.query);
+                            //     logger.error(`there is no fw versions for user's id:${ id } device`, req.body);
                             //     res.status(204).send(`There is no firmware versions for your device`);
                             // } else {
                             //     const version = decodeEntity( versions[versions.length - 1] );

@@ -31,11 +31,11 @@ export class ProjectsAdminRoutes {
 
             .post( async (req: Request, res: Response) => {
                 try {
-                    const project = createEntity(req.body.query);
+                    const project = createEntity(req.body);
                     await db.sqlRequest(`
                         INSERT INTO projects (${ project.fields }) VALUES (${ project.values });
                     `);
-                    logger.info(`new project "${req.body.query.name}" created by admin`);
+                    logger.info(`new project "${req.body.name}" created by admin`);
                     res.sendStatus(200);
                 } catch (error) {
                     logger.error('new project creation failed', error);
@@ -64,7 +64,7 @@ export class ProjectsAdminRoutes {
             .put( async (req: Request, res: Response) => {
                 try {
                     const id = getIdFromUrl(req.originalUrl);
-                    const updatedProject = updateEntity(req.body.query);
+                    const updatedProject = updateEntity(req.body);
                     await db.sqlRequest(`
                         UPDATE projects SET ${ updatedProject } WHERE id="${ id }";
                     `);
