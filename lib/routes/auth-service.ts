@@ -16,41 +16,42 @@ class AuthService {
 
     private async _login(applicant: {login: string, password: string, isAdmin?: boolean}) {
         try {
-            const rows: Array<{login: string, id: number, permissions: number}> = await db.sqlRequest(`
-                SELECT login, id, permissions FROM users WHERE password="${ base64.encode(applicant.password) }";
+            const rows: Array<{id: number, login: string, email: string, permissions: number}> = await db.sqlRequest(`
+                SELECT id, email, permissions FROM users WHERE password="${ base64.encode(applicant.password) } AND login="${ base64.encode(applicant.login) }";
             `);
 
             if (rows[0]) {
                 if ( !applicant.isAdmin || (applicant.isAdmin && rows[0].permissions > 0) ) {
-                    const token = md5(`Bearer: ${ applicant.login }`);
-                    return { token: token.toString(), id: rows[0].id, code: 200 };
+                    const token = rows[0].login + '^@' + md5(`Bearer: ${ rows[0].email }`);
+                    return { token: token.toString(), code: 200, id: rows[0].id };
                 } else {
-                    return { token: '', id: 0, code: 403 };
+                    return { token: '', code: 403, id: 0 };
                 }
             } else {
-                return { token: '', id: 0, code: 401 };
+                return { token: '', code: 401, id: 0 };
             }
         } catch (error) {
             throw error;
         }
     }
 
-    private async _verifyToken(id: number, req: Request, isAdmin: boolean = false) {
+    private async _verifyToken(req: Request) {
         try {
             if ( !req.headers && !req.headers['authorization']) {
-                return {authorized: false};
+                return {authorized: false, permissions: 0, id: 0};
             } else {
-                const rows = await db.sqlRequest(`
-                    SELECT login, permissions FROM users WHERE id="${ id }";
+                const splitedToken = (req.headers['authorization'] as string).split('^@');
+                const rows: Array<{id: number, email: string, permissions: number}> = await db.sqlRequest(`
+                    SELECT id, email, permissions FROM users WHERE login="${ splitedToken[0] }";
                 `);
 
                 if (
                     rows[0]
-                    && req.headers.authorization === md5(`Bearer: ${ base64.decode(rows[0].login) }`).toString()
+                    && splitedToken[1] === md5(`Bearer: ${ base64.decode(rows[0].email) }`).toString()
                         ) {
-                            return {authorized: true, permissions: rows[0].permissions};
+                            return {authorized: true, permissions: rows[0].permissions, id: rows[0].id};
                 } else {
-                    return {authorized: false};
+                    return {authorized: false, permissions: 0, id: 0};
                 }
             }
         } catch (error) {
