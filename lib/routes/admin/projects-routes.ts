@@ -15,11 +15,11 @@ export class ProjectsAdminRoutes {
                     const validity = await authService.verifyToken(req);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to get projects list as admin`, Object.assign(req.body, req.headers));
+                        logger.error(`unauthorized user tried to get projects list as admin`, req.headers);
                         res.sendStatus(401);
                     } else {
                       if (validity.permissions !== 8) {
-                        logger.error(`user with low permissions tried to get projects list as admin`, Object.assign(req.body, req.headers));
+                        logger.error(`user with low permissions tried to get projects list as admin`, req.headers);
                         res.sendStatus(403);
                       } else {
                             let filters = '';

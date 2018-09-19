@@ -17,7 +17,7 @@ class AuthService {
     private async _login(applicant: {login: string, password: string, isAdmin?: boolean}) {
         try {
             const rows: Array<{id: number, login: string, email: string, permissions: number}> = await db.sqlRequest(`
-                SELECT id, email, permissions FROM users WHERE password='${ base64.encode(applicant.password) }' AND login='${ base64.encode(applicant.login) }';
+                SELECT id, login, email, permissions FROM users WHERE password='${ base64.encode(applicant.password) }' AND login='${ base64.encode(applicant.login) }';
             `);
 
             if (rows[0]) {
@@ -37,7 +37,7 @@ class AuthService {
 
     private async _verifyToken(req: Request) {
         try {
-            if ( !req.headers && !req.headers['authorization']) {
+            if ( !req.headers || !req.headers['authorization']) {
                 return {authorized: false, permissions: 0, id: 0};
             } else {
                 const splitedToken = (req.headers['authorization'] as string).split('^@');
@@ -47,7 +47,7 @@ class AuthService {
 
                 if (
                     rows[0]
-                    && splitedToken[1] === md5(`Bearer: ${ base64.decode(rows[0].email) }`).toString()
+                    && splitedToken[1] === md5(`Bearer: ${ rows[0].email }`).toString()
                         ) {
                             return {authorized: true, permissions: rows[0].permissions, id: rows[0].id};
                 } else {
