@@ -44,11 +44,11 @@ export class AdminRoutes {
                     const validity = await authService.verifyToken(req);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to logout as admin`, Object.assign(req.body, req.headers));
+                        logger.error(`unauthorized user tried to logout as admin`, req.headers);
                         res.sendStatus(401);
                     } else {
                         if (validity.permissions !== 8) {
-                            logger.error(`user with low permissions tried to login as admin`, Object.assign(req.body, req.headers));
+                            logger.error(`user with low permissions tried to login as admin`, req.headers);
                             res.sendStatus(403);
                         } else {
                             await db.sqlRequest(`
@@ -56,6 +56,30 @@ export class AdminRoutes {
                             `);
                             logger.info(`user id:${ validity.id } logout`);
                             res.sendStatus(200);
+                        }
+                    }
+                } catch (error) {
+                    logger.error(`admin logout failed`, error);
+                    res.status(500).send(error);
+                }
+            }
+        );
+
+        app.route('/api/admin/is-admin')
+            .get( async (req: Request, res: Response) => {
+                try {
+                    const validity = await authService.verifyToken(req);
+
+                    if (!validity.authorized) {
+                        logger.error(`unauthorized user tried to get permissions info`, req.headers);
+                        res.sendStatus(401);
+                    } else {
+                        if (validity.permissions === 8) {
+                            logger.info(`user id:${ validity.id } informed that he is an admin`);
+                            res.status(200).send(true);
+                        } else {
+                            logger.info(`user id:${ validity.id } informed that he is not an admin`);
+                            res.status(200).send(false);
                         }
                     }
                 } catch (error) {

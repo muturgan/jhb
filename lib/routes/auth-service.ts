@@ -48,12 +48,12 @@ class AuthService {
             } else {
                 const splitedToken = (req.headers['authorization'] as string).split('^@');
                 const rows: Array<{id: number, email: string, permissions: number}> = await db.sqlRequest(`
-                    SELECT id, email, permissions FROM users WHERE login="${ splitedToken[0] }";
+                    SELECT id, email, permissions FROM users WHERE email="${ splitedToken[0] }";
                 `);
 
                 if (
                     rows[0]
-                    && splitedToken[1] === md5(`Bearer: ${ rows[0].email }`).toString()
+                    && splitedToken[1] === md5(`Bearer: ${ rows[0].id }`).toString()
                         ) {
                             return {authorized: true, permissions: rows[0].permissions, id: rows[0].id};
                 } else {
