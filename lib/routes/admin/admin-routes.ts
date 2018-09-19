@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import db from '../../db-controller';
 import logger from '../../logger';
-import { getIdFromUrl } from '../support-functions';
 import authService from '../auth-service';
 
 export class AdminRoutes {
@@ -19,10 +18,10 @@ export class AdminRoutes {
                                 UPDATE users SET status = 'online' WHERE id = ${ validity.id };
                             `);
                             logger.info(`user id:${validity.id} login`);
-                            res.status(200).send({token: validity.token, id: validity.id});
+                            res.status(200).send({token: validity.token, id: validity.id, login: validity.login, email: validity.email});
                             break;
                         case 401:
-                            logger.info(`incorrect password by user ${req.body.login}`);
+                            logger.info(`incorrect password by user ${req.body.email}`);
                             res.sendStatus(401);
                             break;
                         case 403:

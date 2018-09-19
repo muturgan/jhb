@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import db from '../../db-controller';
 import logger from '../../logger';
 import { getIdFromUrl, createEntity, decodeEntity, updateEntity, setFilters } from '../support-functions';
+import authService from '../auth-service';
 
 export class NewsAdminRoutes {
 
@@ -11,18 +12,30 @@ export class NewsAdminRoutes {
         app.route('/api/admin/news')
             .get( async (req: Request, res: Response) => {
                 try {
-                    let filters = '';
-                    if (Object.keys(req.query).length) {
-                        filters = setFilters(req.query);
+                    const validity = await authService.verifyToken(req);
+
+                    if (!validity.authorized) {
+                        logger.error(`unauthorized user tried to get news list as admin`, req.headers);
+                        res.sendStatus(401);
+                    } else {
+                        if (validity.permissions !== 8) {
+                            logger.error(`user with low permissions tried to get news list as admin`, req.headers);
+                            res.sendStatus(403);
+                        } else {
+                            let filters = '';
+                            if (Object.keys(req.query).length) {
+                                filters = setFilters(req.query);
+                            }
+                            const news = await db.sqlRequest(`
+                                SELECT * FROM news ${filters};
+                            `);
+                            for (let i = 0; i < news.length; i++) {
+                                news[i] = decodeEntity(news[i]);
+                            }
+                            logger.info(`news were sent to admin`);
+                            res.status(200).send(news);
+                        }
                     }
-                    const news = await db.sqlRequest(`
-                        SELECT * FROM news ${filters};
-                    `);
-                    for (let i = 0; i < news.length; i++) {
-                        news[i] = decodeEntity(news[i]);
-                    }
-                    logger.info(`news were sent to admin`);
-                    res.status(200).send(news);
                 } catch (error) {
                     logger.error('news sending to admin failed', error);
                     res.status(500).send(error);
@@ -31,12 +44,24 @@ export class NewsAdminRoutes {
 
             .post( async (req: Request, res: Response) => {
                 try {
-                    const theNew = createEntity(req.body);
-                    await db.sqlRequest(`
-                        INSERT INTO news (${ theNew.fields }) VALUES (${ theNew.values });
-                    `);
-                    logger.info(`the new "${req.body.title}" created`);
-                    res.sendStatus(200);
+                    const validity = await authService.verifyToken(req);
+
+                    if (!validity.authorized) {
+                        logger.error(`unauthorized user tried to create the new as admin`, Object.assign(req.body, req.headers));
+                        res.sendStatus(401);
+                    } else {
+                        if (validity.permissions !== 8) {
+                          logger.error(`user with low permissions tried to create the new as admin`, Object.assign(req.body, req.headers));
+                          res.sendStatus(403);
+                        } else {
+                            const theNew = createEntity(req.body);
+                            await db.sqlRequest(`
+                                // INSERT INTO news (${ theNew.fields }) VALUES (${ theNew.values });
+                            `);
+                            logger.info(`the new "${req.body.title}" created`);
+                            res.sendStatus(200);
+                                }
+                            }
                 } catch (error) {
                     logger.error('new new creation failed', error);
                     res.status(500).send(error);

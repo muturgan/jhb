@@ -1,5 +1,6 @@
 import Base64 = require('js-base64');
 export const base64 = Base64.Base64;
+import { Request } from 'express';
 
 const checkUndecoding = (key: string): boolean => {
     if (
@@ -91,4 +92,21 @@ export const setFilters = (filters: {[key: string]: string }): string => {
     }
     filtersString = `WHERE ${filtersString.substring(0, filtersString.length - 5)}`;
     return filtersString;
+};
+
+export const attackerDetails = (req: Request) => {
+    const attacker = {};
+    Object.assign(
+        attacker,
+        req.connection,
+        req.cookies,
+        req.host,
+        req.hostname,
+        req.ip,
+        req.method,
+        req.originalUrl,
+        req.body,
+        req.headers,
+        );
+    return attacker;
 };

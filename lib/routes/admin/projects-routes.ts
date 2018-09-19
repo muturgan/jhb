@@ -18,10 +18,10 @@ export class ProjectsAdminRoutes {
                         logger.error(`unauthorized user tried to get projects list as admin`, req.headers);
                         res.sendStatus(401);
                     } else {
-                      if (validity.permissions !== 8) {
-                        logger.error(`user with low permissions tried to get projects list as admin`, req.headers);
-                        res.sendStatus(403);
-                      } else {
+                        if (validity.permissions !== 8) {
+                            logger.error(`user with low permissions tried to get projects list as admin`, req.headers);
+                            res.sendStatus(403);
+                        } else {
                             let filters = '';
                             if (Object.keys(req.query).length) {
                                 filters = setFilters(req.query);
@@ -34,7 +34,7 @@ export class ProjectsAdminRoutes {
                             }
                             logger.info(`projects were sent to admin`);
                             res.status(200).send(projects);
-                      }
+                        }
                     }
                 } catch (error) {
                     logger.error('projects sending to admin failed', error);

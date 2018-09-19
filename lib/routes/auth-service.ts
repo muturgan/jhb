@@ -14,21 +14,27 @@ class AuthService {
     }
 
 
-    private async _login(applicant: {login: string, password: string, isAdmin?: boolean}) {
+    private async _login(applicant: {email: string, password: string, isAdmin?: boolean}) {
         try {
+            console.log(base64.decode('QW5kcmV5'));
+            console.log(base64.decode('YW5kcmV5'));
+            console.log(base64.decode('Y2F4YXBAaXR0LmNvbQ=='));
+            console.log(base64.decode('MTM1Mzg2NA=='));
             const rows: Array<{id: number, login: string, email: string, permissions: number}> = await db.sqlRequest(`
-                SELECT id, login, email, permissions FROM users WHERE password='${ base64.encode(applicant.password) }' AND login='${ base64.encode(applicant.login) }';
+                SELECT id, login, email, permissions FROM users WHERE password='${ base64.encode(applicant.password) }' AND email='${ base64.encode(applicant.email) }';
             `);
 
             if (rows[0]) {
                 if ( !applicant.isAdmin || (applicant.isAdmin && rows[0].permissions > 0) ) {
-                    const token = rows[0].login + '^@' + md5(`Bearer: ${ rows[0].email }`);
-                    return { token: token.toString(), code: 200, id: rows[0].id };
+                    const token = rows[0].email + '^@' + md5(`Bearer: ${ rows[0].id }`);
+                    console.log('token:');
+                    console.log(token);
+                    return { token: token.toString(), code: 200, id: rows[0].id, login: base64.decode(rows[0].login), email: base64.decode(rows[0].email)};
                 } else {
-                    return { token: '', code: 403, id: 0 };
+                    return { token: '', code: 403, id: 0, login: '', email: '' };
                 }
             } else {
-                return { token: '', code: 401, id: 0 };
+                return { token: '', code: 401, id: 0, login: '', email: '' };
             }
         } catch (error) {
             throw error;
