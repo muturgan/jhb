@@ -42,23 +42,31 @@ export class AdminRoutes {
             .get( async (req: Request, res: Response) => {
                 try {
                     const validity = await authService.verifyToken(req);
+                    console.log('validity:');
+                    console.log(validity);
 
-                    if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to logout as admin`, req.headers);
-                        res.sendStatus(401);
-                    } else {
-                        if (validity.permissions !== 8) {
-                            logger.error(`user with low permissions tried to login as admin`, req.headers);
-                            res.sendStatus(403);
+                    if (validity) {
+                        if (!validity.authorized) {
+                            logger.error(`unauthorized user tried to logout as admin`, req.headers);
+                            res.sendStatus(401);
                         } else {
-                            await db.sqlRequest(`
-                                UPDATE users SET status = 'offline' WHERE id = ${ validity.id };
-                            `);
-                            logger.info(`user id:${ validity.id } logout`);
-                            res.sendStatus(200);
+                            if (validity.permissions !== 8) {
+                                logger.error(`user with low permissions tried to login as admin`, req.headers);
+                                res.sendStatus(403);
+                            } else {
+                                await db.sqlRequest(`
+                                    UPDATE users SET status = 'offline' WHERE id = ${ validity.id };
+                                `);
+                                logger.info(`user id:${ validity.id } logout`);
+                                res.sendStatus(200);
+                            }
                         }
+                    } else {
+                        logger.error(`admin logout failed`, {validity});
+                        res.status(500).send({validity});
                     }
                 } catch (error) {
+                    console.log(error);
                     logger.error(`admin logout failed`, error);
                     res.status(500).send(error);
                 }
