@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import db from '../../db-controller';
 import logger from '../../logger';
 import authService from '../auth-service';
-import { getIdFromUrl, createEntity, decodeEntity, updateEntity } from '../support-functions';
+import { createEntity, decodeEntity, updateEntity } from '../support-functions';
 import fs = require('fs');
 import path = require('path');
 import { base64 } from '../support-functions';
@@ -222,7 +222,7 @@ export class UserApiRoutes {
                                     res.status(204).send(`There is no firmware versions for your device`);
                                 } else {
                                     const version = decodeEntity( versions[versions.length - 1] );
-                                    const versionPath = path.join(__dirname,
+                                    const versionPath = path.join(process.cwd(),
                                         `update/${
                                         req.body.brand }/${
                                         req.body.model }/${
@@ -243,7 +243,7 @@ export class UserApiRoutes {
                                     res.sendStatus(200);
                                 }
                                 // res.sendStatus(200);
-                                // fs.stat(path.join(__dirname, '/static/index.html'), () => {});
+                                // fs.stat(path.join(process.cwd(), '/static/index.html'), () => {});
                             }
                             // const versions = await db.sqlRequest(`
                             //     SELECT * FROM fwversions WHERE fullimage = 0;

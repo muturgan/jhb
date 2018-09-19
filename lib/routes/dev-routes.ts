@@ -15,7 +15,7 @@ export class DevRoutes {
         app.route('/getLogs')
         .get((req: Request, res: Response) => {
             try {
-                res.sendFile( path.join(__dirname, '/combined.log') );
+                res.sendFile( path.join(process.cwd(), '/combined.log') );
                 logger.info(`logs were sent to ${ req.ip }`);
             } catch (error) {
                 logger.error(`failed to send logs tp ${ req.ip }`, error);
