@@ -14,12 +14,15 @@ export class NewsApiRoutes {
                     if (Object.keys(req.query).length) {
                         filters = setFilters(req.query);
                     }
+
                     const news = await db.sqlRequest(`
                         SELECT * FROM news ${filters};
                     `);
+
                     for (let i = 0; i < news.length; i++) {
                         news[i] = decodeEntity(news[i]);
                     }
+
                     logger.info(`news were sent`);
                     res.status(200).send(news);
                 } catch (error) {

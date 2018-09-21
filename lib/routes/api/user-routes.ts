@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import db from '../../db-controller';
 import logger from '../../logger';
 import authService from '../auth-service';
-import { createEntity, decodeEntity, updateEntity } from '../support-functions';
+import { createEntity, decodeEntity, updateEntity, attackerDetails } from '../support-functions';
 import fs = require('fs');
 import path = require('path');
 import { base64 } from '../support-functions';
@@ -13,30 +13,12 @@ export class UserApiRoutes {
     public routes(app): void {
 
         app.route('/api/user')
-            .post( async (req: Request, res: Response) => {
-                try {
-                    const user = createEntity(req.body);
-                    await db.sqlRequest(`
-                        INSERT INTO users (${ user.fields }) VALUES (${ user.values });
-                    `);
-                    logger.info(`new user ${req.body.login} created`);
-                    res.sendStatus(200);
-                } catch (error) {
-                    logger.error('new user creation failed', error);
-                    res.status(500).send(error);
-                }
-            }
-        );
-
-
-
-        app.route('/api/user')
             .get( async (req: Request, res: Response) => {
                 try {
                     const validity = await authService.verifyToken(req);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to get user info`, Object.assign(req.body, req.headers));
+                        logger.error(`unauthorized user tried to get user info`, attackerDetails(req));
                         res.sendStatus(401);
                     } else {
                         const rows = await db.sqlRequest(`
@@ -52,12 +34,28 @@ export class UserApiRoutes {
                 }
             })
 
+
+            .post( async (req: Request, res: Response) => {
+                try {
+                    const user = createEntity(req.body);
+                    await db.sqlRequest(`
+                        INSERT INTO users (${ user.fields }) VALUES (${ user.values });
+                    `);
+                    logger.info(`new user ${req.body.login} created`);
+                    res.sendStatus(200);
+                } catch (error) {
+                    logger.error('new user creation failed', error);
+                    res.status(500).send(error);
+                }
+            })
+
+
             .put( async (req: Request, res: Response) => {
                 try {
                     const validity = await authService.verifyToken(req);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to update user info`, Object.assign(req.body, req.headers));
+                        logger.error(`unauthorized user tried to update user info`, attackerDetails(req));
                         res.sendStatus(401);
                     } else {
                         const updatedUser = updateEntity(req.body);
@@ -72,6 +70,7 @@ export class UserApiRoutes {
                     res.status(500).send(error);
                 }
             })
+
 
             .delete( async (req: Request, res: Response) => {
                 try {
@@ -99,14 +98,14 @@ export class UserApiRoutes {
         app.route('/api/user/login')
             .post( async (req: Request, res: Response) => {
                 try {
-                    const validity = await authService.login(req.body);
+                    const validity = await authService.login(req.body.email, req.body.password);
 
                     switch (validity.code) {
                         case 200:
                             await db.sqlRequest(`
-                                UPDATE users SET status = 'online' WHERE login = ${ base64.encode(req.body.login) };
+                                UPDATE users SET isOnline = 1 WHERE email = '${ base64.encode(req.body.email) }';
                             `);
-                            logger.info(`user ${req.body.login} login`);
+                            logger.info(`user ${req.body.email} login`);
                             res.status(200).send({token: validity.token});
                             break;
                         case 401:
@@ -117,7 +116,7 @@ export class UserApiRoutes {
                             logger.error(`something wrong with autorization`, req.body);
                     }
                 } catch (error) {
-                    logger.error(`login failed for ${req.body.login}`, error);
+                    logger.error(`login failed for ${req.body.email}`, error);
                     res.status(500).send(error);
                 }
             }
@@ -134,7 +133,7 @@ export class UserApiRoutes {
                         res.sendStatus(401);
                     } else {
                         await db.sqlRequest(`
-                            UPDATE users SET status = 'offline' WHERE id = ${ validity.id };
+                            UPDATE users SET isOnline = 0 WHERE id = ${ validity.id };
                         `);
                         logger.info(`user id:${ validity.id } logout`);
                         res.sendStatus(200);
@@ -230,8 +229,6 @@ export class UserApiRoutes {
                                         version.version }.txt`);
                                     fs.stat(versionPath, (error, stats) => {
                                         if (error || !stats.isFile()) {
-                                    //         console.log('versionPath:');
-                                    // console.log(versionPath);
                                             logger.error(`incorrect version request`, error);
                                             res.sendStatus(404);
                                         } else {

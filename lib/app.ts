@@ -6,7 +6,7 @@ import { DevRoutes } from './routes/dev-routes';
 import { UserApiRoutes } from './routes/api/user-routes';
 import { NewsApiRoutes } from './routes/api/news-routes';
 import { FwVersionsApiRoutes } from './routes/api/fw-versions-routes';
-import { UsersAdminRoutes } from './routes/admin/users-routes';
+import { OfficersAdminRoutes } from './routes/admin/officers-routes';
 import { DevicesAdminRoutes } from './routes/admin/devices-routes';
 import { ProjectsAdminRoutes } from './routes/admin/projects-routes';
 import { FwsAdminRoutes } from './routes/admin/fws-routes';
@@ -25,7 +25,7 @@ class App {
     private _userApiRoutes: UserApiRoutes = new UserApiRoutes();
     private _newsApiRoutes: NewsApiRoutes = new NewsApiRoutes();
     private _fwVersionsApiRoutes: FwVersionsApiRoutes = new FwVersionsApiRoutes();
-    private _userAdminRoutes: UsersAdminRoutes = new UsersAdminRoutes();
+    private _userAdminRoutes: OfficersAdminRoutes = new OfficersAdminRoutes();
     private _devicesAdminRoutes: DevicesAdminRoutes = new DevicesAdminRoutes();
     private _projectsAdminRoutes: ProjectsAdminRoutes = new ProjectsAdminRoutes();
     private _fwsAdminRoutes: FwsAdminRoutes = new FwsAdminRoutes();

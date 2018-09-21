@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import db from '../../db-controller';
 import logger from '../../logger';
-import { getIdFromUrl, createEntity, decodeEntity, updateEntity, setFilters } from '../support-functions';
+import { getIdFromUrl, createEntity, decodeEntity, updateEntity, setFilters, attackerDetails } from '../support-functions';
 import authService from '../auth-service';
 
 export class NewsAdminRoutes {
@@ -12,14 +12,14 @@ export class NewsAdminRoutes {
         app.route('/api/admin/news')
             .get( async (req: Request, res: Response) => {
                 try {
-                    const validity = await authService.verifyToken(req);
+                    const validity = await authService.verifyToken(req, true);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to get news list as admin`, req.headers);
+                        logger.error(`unauthorized user tried to get news list as admin`, attackerDetails(req));
                         res.sendStatus(401);
                     } else {
-                        if (validity.permissions !== 8) {
-                            logger.error(`user with low permissions tried to get news list as admin`, req.headers);
+                        if (validity.permissions <= 6) {
+                            logger.error(`user with low permissions tried to get news list as admin`, attackerDetails(req));
                             res.sendStatus(403);
                         } else {
                             let filters = '';
@@ -44,19 +44,19 @@ export class NewsAdminRoutes {
 
             .post( async (req: Request, res: Response) => {
                 try {
-                    const validity = await authService.verifyToken(req);
+                    const validity = await authService.verifyToken(req, true);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to create the new as admin`, Object.assign(req.body, req.headers));
+                        logger.error(`unauthorized user tried to create the new as admin`, attackerDetails(req));
                         res.sendStatus(401);
                     } else {
-                        if (validity.permissions !== 8) {
-                          logger.error(`user with low permissions tried to create the new as admin`, Object.assign(req.body, req.headers));
+                        if (validity.permissions <= 6) {
+                          logger.error(`user with low permissions tried to create the new as admin`, attackerDetails(req));
                           res.sendStatus(403);
                         } else {
                             const theNew = createEntity(req.body);
                             await db.sqlRequest(`
-                                // INSERT INTO news (${ theNew.fields }) VALUES (${ theNew.values });
+                                INSERT INTO news (${ theNew.fields }) VALUES (${ theNew.values });
                             `);
                             logger.info(`the new "${req.body.title}" created`);
                             res.sendStatus(200);

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import db from '../../db-controller';
 import logger from '../../logger';
-import { getIdFromUrl, createEntity, decodeEntity, updateEntity, setFilters } from '../support-functions';
+import { getIdFromUrl, createEntity, decodeEntity, updateEntity, setFilters, attackerDetails } from '../support-functions';
 import authService from '../auth-service';
 
 export class ProjectsAdminRoutes {
@@ -15,11 +15,11 @@ export class ProjectsAdminRoutes {
                     const validity = await authService.verifyToken(req);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to get projects list as admin`, req.headers);
+                        logger.error(`unauthorized user tried to get projects list as admin`, attackerDetails(req));
                         res.sendStatus(401);
                     } else {
-                        if (validity.permissions !== 8) {
-                            logger.error(`user with low permissions tried to get projects list as admin`, req.headers);
+                        if (validity.permissions < 6) {
+                            logger.error(`user with low permissions tried to get projects list as admin`, attackerDetails(req));
                             res.sendStatus(403);
                         } else {
                             let filters = '';
@@ -47,12 +47,12 @@ export class ProjectsAdminRoutes {
                     const validity = await authService.verifyToken(req);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to create new project as admin`, Object.assign(req.body, req.headers));
+                        logger.error(`unauthorized user tried to create new project as admin`, attackerDetails(req));
                         res.sendStatus(401);
                     } else {
                       if (validity.permissions !== 8) {
                        logger
-                        .error(`user with low permissions tried to create new project list as admin`, Object.assign(req.body, req.headers));
+                        .error(`user with low permissions tried to create new project list as admin`, attackerDetails(req));
                        res.sendStatus(403);
                       } else {
                             const project = createEntity(req.body);
@@ -76,12 +76,12 @@ export class ProjectsAdminRoutes {
                     const validity = await authService.verifyToken(req);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to get project info as admin`, Object.assign(req.body, req.headers));
+                        logger.error(`unauthorized user tried to get project info as admin`, attackerDetails(req));
                         res.sendStatus(401);
                     } else {
-                        if (validity.permissions !== 8) {
+                        if (validity.permissions < 6) {
                             logger
-                              .error(`user with low permissions tried to get project info as admin`, Object.assign(req.body, req.headers));
+                              .error(`user with low permissions tried to get project info as admin`, attackerDetails(req));
                             res.sendStatus(403);
                         } else {
                             const id = getIdFromUrl(req.originalUrl);
@@ -105,12 +105,12 @@ export class ProjectsAdminRoutes {
                     const validity = await authService.verifyToken(req);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to update project info as admin`, Object.assign(req.body, req.headers));
+                        logger.error(`unauthorized user tried to update project info as admin`, attackerDetails(req));
                         res.sendStatus(401);
                     } else {
                         if (validity.permissions !== 8) {
                           logger
-                            .error(`user with low permissions tried to update project info as admin`, Object.assign(req.body, req.headers));
+                            .error(`user with low permissions tried to update project info as admin`, attackerDetails(req));
                           res.sendStatus(403);
                         } else {
                             const id = getIdFromUrl(req.originalUrl);
@@ -133,12 +133,12 @@ export class ProjectsAdminRoutes {
                     const validity = await authService.verifyToken(req);
 
                     if (!validity.authorized) {
-                        logger.error(`unauthorized user tried to delete project info as admin`, Object.assign(req.body, req.headers));
+                        logger.error(`unauthorized user tried to delete project info as admin`, attackerDetails(req));
                         res.sendStatus(401);
                     } else {
                         if (validity.permissions !== 8) {
                           logger
-                            .error(`user with low permissions tried to delete project info as admin`, Object.assign(req.body, req.headers));
+                            .error(`user with low permissions tried to delete project info as admin`, attackerDetails(req));
                           res.sendStatus(403);
                         } else {
                             const id = getIdFromUrl(req.originalUrl);
